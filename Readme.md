@@ -1,7 +1,8 @@
+```
 Name: Shubham Kumar Singh
 Email: ssing163@binghamton.edu
 BU ID: B00955182
-
+```
 
 This is a paper for cs544 course. This paper covers the web programming framework for 3D animation i.e WebGL. 
 I have used Three.js library to use the concepts in WebGl.
