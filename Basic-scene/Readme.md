@@ -8,4 +8,5 @@ To Run this code you need to downlod the three.js lib
 
 ### Output
 when you open the html file, you will be able to see something like below
-![output](./assets/rendering-cube.png)
+
+![output](../assets/rendering-cube.png)
