@@ -6,7 +6,7 @@ BU ID: B00955182
 This is a paper for cs544 course. This paper covers the web programming framework for 3D animation i.e WebGL. 
 I have used Three.js library to use the concepts in WebGl.
 
-[Read The Paper] (./Paper.md)
+[Read The Paper](https://github.com/denyshubh/cs544-paper/blob/main/Paper.md)
 
 ## About Codes In This Repository
 
