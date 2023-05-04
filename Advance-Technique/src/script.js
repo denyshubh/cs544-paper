@@ -1,233 +1,132 @@
-import * as dat from 'lil-gui'
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import firefliesVertexShader from './shaders/fireflies/vertex.glsl'
-import firefliesFragmentShader from './shaders/fireflies/fragment.glsl'
-import portalVertexShader from './shaders/portal/vertex.glsl'
-import portalFragmentShader from './shaders/portal/fragment.glsl'
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import * as dat from 'lil-gui';
+import firefliesVertexShader from './shaders/fireflies/vertex.glsl';
+import firefliesFragmentShader from './shaders/fireflies/fragment.glsl';
+import portalVertexShader from './shaders/portal/vertex.glsl';
+import portalFragmentShader from './shaders/portal/fragment.glsl';
 
-/**
- * Base
- */
-// Debug
-const debugObject = {}
-const gui = new dat.GUI({
-    width: 400
-})
+const debugObject = {};
+const gui = new dat.GUI({ width: 400 });
+const canvas = document.querySelector('canvas.webgl');
+const scene = new THREE.Scene();
 
-// Canvas
-const canvas = document.querySelector('canvas.webgl')
+const textureLoader = new THREE.TextureLoader();
+const dracoLoader = new DRACOLoader().setDecoderPath('draco/');
+const gltfLoader = new GLTFLoader().setDRACOLoader(dracoLoader);
 
-// Scene
-const scene = new THREE.Scene()
+const bakedTexture = textureLoader.load('baked.jpg');
+bakedTexture.flipY = false;
+bakedTexture.encoding = THREE.sRGBEncoding;
 
-/**
- * Loaders
- */
-// Texture loader
-const textureLoader = new THREE.TextureLoader()
+const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
+const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
 
-// Draco loader
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('draco/')
+debugObject.portalColorStart = '#ff0000';
+debugObject.portalColorEnd = '#0000ff';
 
-// GLTF loader
-const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
+gui.addColor(debugObject, 'portalColorStart').onChange(() => {
+    portalLightMaterial.uniforms.uColorStart.value.set(debugObject.portalColorStart);
+});
 
-/**
- * Textures
- */
-const bakedTexture = textureLoader.load('baked.jpg')
-bakedTexture.flipY = false
-bakedTexture.encoding = THREE.sRGBEncoding
-
-/**
- * Materials
- */
-// Baked material
-const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture })
-
-// Pole light material
-const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 })
-
-// Portal light material
-debugObject.portalColorStart = '#ff0000'
-debugObject.portalColorEnd = '#0000ff'
-
-gui
-    .addColor(debugObject, 'portalColorStart')
-    .onChange(() =>
-    {
-        portalLightMaterial.uniforms.uColorStart.value.set(debugObject.portalColorStart)
-    })
-
-gui
-    .addColor(debugObject, 'portalColorEnd')
-    .onChange(() =>
-    {
-        portalLightMaterial.uniforms.uColorEnd.value.set(debugObject.portalColorEnd)
-    })
+gui.addColor(debugObject, 'portalColorEnd').onChange(() => {
+    portalLightMaterial.uniforms.uColorEnd.value.set(debugObject.portalColorEnd);
+});
 
 const portalLightMaterial = new THREE.ShaderMaterial({
-    uniforms:
-    {
+    uniforms: {
         uTime: { value: 0 },
         uColorStart: { value: new THREE.Color(debugObject.portalColorStart) },
         uColorEnd: { value: new THREE.Color(debugObject.portalColorEnd) }
     },
     vertexShader: portalVertexShader,
     fragmentShader: portalFragmentShader
-})
+});
 
-/**
- * Model
- */
-gltfLoader.load(
-    'portal.glb',
-    (gltf) =>
-    {
-        scene.add(gltf.scene)
+gltfLoader.load('portal.glb', (gltf) => {
+    scene.add(gltf.scene);
+    const [bakedMesh, portalLightMesh, poleLightAMesh, poleLightBMesh] = [
+        'baked', 'portalLight', 'poleLightA', 'poleLightB'
+    ].map(name => gltf.scene.children.find(child => child.name === name));
 
-        // Get each object
-        const bakedMesh = gltf.scene.children.find((child) => child.name === 'baked')
-        const portalLightMesh = gltf.scene.children.find((child) => child.name === 'portalLight')
-        const poleLightAMesh = gltf.scene.children.find((child) => child.name === 'poleLightA')
-        const poleLightBMesh = gltf.scene.children.find((child) => child.name === 'poleLightB')
+    Object.assign(bakedMesh, { material: bakedMaterial });
+    Object.assign(portalLightMesh, { material: portalLightMaterial });
+    Object.assign(poleLightAMesh, { material: poleLightMaterial });
+    Object.assign(poleLightBMesh, { material: poleLightMaterial });
+});
 
-        // Apply materials
-        bakedMesh.material = bakedMaterial
-        portalLightMesh.material = portalLightMaterial
-        poleLightAMesh.material = poleLightMaterial
-        poleLightBMesh.material = poleLightMaterial
-    }
-)
+const firefliesGeometry = new THREE.BufferGeometry();
+const firefliesCount = 30;
+const positionArray = new Float32Array(firefliesCount * 3);
+const scaleArray = new Float32Array(firefliesCount);
 
-/**
- * Fireflies
- */
-// Geometry
-const firefliesGeometry = new THREE.BufferGeometry()
-const firefliesCount = 30
-const positionArray = new Float32Array(firefliesCount * 3)
-const scaleArray = new Float32Array(firefliesCount)
-
-for(let i = 0; i < firefliesCount; i++)
-{
-    positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4
-    positionArray[i * 3 + 1] = Math.random() * 1.5
-    positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4
-
-    scaleArray[i] = Math.random()
+for (let i = 0; i < firefliesCount; i++) {
+    positionArray.set([(Math.random() - 0.5) * 4, Math.random() * 1.5, (Math.random() - 0.5) * 4], i * 3);
+    scaleArray[i] = Math.random();
 }
 
-firefliesGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3))
-firefliesGeometry.setAttribute('aScale', new THREE.BufferAttribute(scaleArray, 1))
+firefliesGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+firefliesGeometry.setAttribute('aScale', new THREE.BufferAttribute(scaleArray, 1));
 
-// Material
 const firefliesMaterial = new THREE.ShaderMaterial({
-    uniforms:
-    {
-        uTime: { value: 0 },
-        uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
-        uSize: { value: 100 }
-    },
-    vertexShader: firefliesVertexShader,
-    fragmentShader: firefliesFragmentShader,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-})
+uniforms: {
+uTime: { value: 0 },
+uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+uSize: { value: 100 }
+},
+vertexShader: firefliesVertexShader,
+fragmentShader: firefliesFragmentShader,
+transparent: true,
+blending: THREE.AdditiveBlending,
+depthWrite: false
+});
 
-gui.add(firefliesMaterial.uniforms.uSize, 'value').min(0).max(500).step(1).name('firefliesSize')
+gui.add(firefliesMaterial.uniforms.uSize, 'value').min(0).max(500).step(1).name('firefliesSize');
 
-// Points
-const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial)
-scene.add(fireflies)
+const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
+scene.add(fireflies);
 
-/**
- * Sizes
- */
-const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
-}
+const sizes = { width: window.innerWidth, height: window.innerHeight };
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+window.addEventListener('resize', () => {
+Object.assign(sizes, { width: window.innerWidth, height: window.innerHeight });
+camera.aspect = sizes.width / sizes.height;
+camera.updateProjectionMatrix();
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+firefliesMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+});
+const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
+camera.position.set(4, 2, 4);
+scene.add(camera);
 
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Update fireflies
-    firefliesMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2)
-})
+debugObject.clearColor = '#201919';
+renderer.setClearColor(debugObject.clearColor);
+gui.addColor(debugObject, 'clearColor').onChange(() => {
+renderer.setClearColor(debugObject.clearColor);
+});
 
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 4
-camera.position.y = 2
-camera.position.z = 4
-scene.add(camera)
+const clock = new THREE.Clock();
 
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
+const tick = () => {
+const elapsedTime = clock.getElapsedTime();
+portalLightMaterial.uniforms.uTime.value = elapsedTime;
+firefliesMaterial.uniforms.uTime.value = elapsedTime;
 
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    antialias: true
-})
-renderer.outputEncoding = THREE.sRGBEncoding
-renderer.setSize(sizes.width, sizes.height)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+controls.update();
 
-debugObject.clearColor = '#201919'
-renderer.setClearColor(debugObject.clearColor)
-gui
-    .addColor(debugObject, 'clearColor')
-    .onChange(() =>
-    {
-        renderer.setClearColor(debugObject.clearColor)
-    })
+renderer.render(scene, camera);
+window.requestAnimationFrame(tick);
+};
 
-/**
- * Animate
- */
-const clock = new THREE.Clock()
-
-const tick = () =>
-{
-    const elapsedTime = clock.getElapsedTime()
-
-    // Update materials
-    portalLightMaterial.uniforms.uTime.value = elapsedTime
-    firefliesMaterial.uniforms.uTime.value = elapsedTime
-
-    // Update controls
-    controls.update()
-
-    // Render
-    renderer.render(scene, camera)
-
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
-}
-
-tick()
+tick();
