@@ -4,6 +4,7 @@
 Three.js is a popular JavaScript library that simplifies the creation and manipulation of 3D graphics using WebGL. This paper will explore the fundamentals of WebGL, the benefits of using Three.js, and the remarkable projects that have been created using this library. I will discuss the advantages of Three.js over other WebGL libraries and provide insights into the library's background, features, and documentation. Through this exploration, I'll demonstrate the power and versatility of Three.js in creating stunning and interactive 3D experiences for web applications.
 
 All the codes can be found on my GitHub (https://github.com/denyshubh/cs544-paper) with comprehensive Readme. 
+I have also deployed the Portal App on my Azure VM. You can access the  ***[Live App](https://cs544.mahwish.me/.)*** at https://cs544.mahwish.me/ 
 
 ## 1. Introduction:
 The growing demand for immersive and interactive web experiences has led developers to seek out tools that can simplify the process of creating 3D graphics. **WebGL**, a JavaScript API for rendering 2D and 3D graphics within compatible web browsers, has emerged as a powerful solution. **```However, the complexity of working with shaders, matrices, and other low-level aspects of WebGL can be challenging for many developers.```**
