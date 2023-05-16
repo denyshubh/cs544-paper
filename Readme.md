@@ -7,7 +7,7 @@ BU ID: B00955182
 This is a paper for cs544 course. This paper covers the web programming framework for 3D animation i.e WebGL. 
 I have used Three.js library to use the concepts in WebGl.
 
-I have deployed the ***[Advance Technique Application](https://cs544.mahwish.me/)*** on my Azure Cloud at https://cs544.mahwish.me/. 
+I have deployed the ***[Advance Technique Application](https://cs544.mahwish.me/)*** on my Azure Cloud at https://cs544.mahwish.me/.  ___Website is No More Available___
 
 [Read The Paper](https://github.com/denyshubh/cs544-paper/blob/main/Paper.md)
 
