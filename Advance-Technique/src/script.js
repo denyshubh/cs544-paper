@@ -8,16 +8,18 @@ import firefliesFragmentShader from './shaders/fireflies/fragment.glsl';
 import portalVertexShader from './shaders/portal/vertex.glsl';
 import portalFragmentShader from './shaders/portal/fragment.glsl';
 
+
+const BASE_URL = "/cs544-paper"
 const debugObject = {};
 const gui = new dat.GUI({ width: 400 });
 const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 const textureLoader = new THREE.TextureLoader();
-const dracoLoader = new DRACOLoader().setDecoderPath('draco/');
+const dracoLoader = new DRACOLoader().setDecoderPath(`${BASE_URL}/draco/`);
 const gltfLoader = new GLTFLoader().setDRACOLoader(dracoLoader);
 
-const bakedTexture = textureLoader.load('baked.jpg');
+const bakedTexture = textureLoader.load(`${BASE_URL}/baked.jpg`);
 bakedTexture.flipY = false;
 bakedTexture.encoding = THREE.sRGBEncoding;
 
@@ -45,7 +47,7 @@ const portalLightMaterial = new THREE.ShaderMaterial({
     fragmentShader: portalFragmentShader
 });
 
-gltfLoader.load('portal.glb', (gltf) => {
+gltfLoader.load(`${BASE_URL}/portal.glb`, (gltf) => {
     scene.add(gltf.scene);
     const [bakedMesh, portalLightMesh, poleLightAMesh, poleLightBMesh] = [
         'baked', 'portalLight', 'poleLightA', 'poleLightB'

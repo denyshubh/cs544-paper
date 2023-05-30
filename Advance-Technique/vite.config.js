@@ -5,7 +5,7 @@ const isCodeSandbox = 'SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in proc
 export default {
     root: 'src/',
     publicDir: '../static/',
-    base: './',
+    base: '/cs544-paper/',
     server:
     {
         host: true,
@@ -13,7 +13,7 @@ export default {
     },
     build:
     {
-        outDir: '../dist',
+        outDir: '../../docs',
         emptyOutDir: true,
         sourcemap: true
     },
